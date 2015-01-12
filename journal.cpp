@@ -12,29 +12,39 @@ class JournalEntry {
     void setEntry(string entry);
     void setDate(string input_date);
     string getDate(void);
+    bool endOfJournal(string last_line);
+    static void getNumOfEntries(void);
+    static int numOfEntries;
   private:
+    int generateId(void);
     void writeToFile(void);
     string entry;
     string date; 
+    int id;
 };
 
 int main(int args, char* argc[]) {
-  string menu_selection;
   bool done = false;
+  string menu_selection;
+  JournalEntry::getNumOfEntries();
   while (!done) {
     cout << "Welcome to your Journal" << endl;
     cout << "Type 'new' for new entry" << endl;
     cout << "Type 'view' to enter viewing mode" << endl;
+    cout << "Type 'delete' to delete entire journal" << endl;
     cout << "Type 'quit' to exit" << endl;
-    menu_selection = "";
     cin >> menu_selection;
-    cout << menu_selection;
     if (menu_selection == "new") {
       JournalEntry new_entry;
     } else if (menu_selection == "view") {
       cout << "Now in viewing mode" << endl;
+      cout << "There are " << JournalEntry::numOfEntries << " entries" << endl; 
     } else if (menu_selection == "quit") {
       done = true;
+    } else if (menu_selection == "delete") {
+      ofstream ofs;
+      ofs.open("journal_entries.txt", ofstream::out | ofstream::trunc);
+      ofs.close();
     } else {
       cout << "Please input a valid option" << endl;
       done = true;
@@ -52,12 +62,19 @@ JournalEntry::JournalEntry(void) {
   time_now = localtime(&time_secs);
   date = string(asctime(time_now)); 
   date = date.substr(0, date.size()-1); 
+  cout << "Type ^D to end journal entry." << endl;
   cout << "Enter journal entry for " << date << " below:" << endl; 
   string line;
-  while (!cin.eof()) {
+  bool done = false;
+  id = generateId();
+  while (!done) {
     getline(cin, line);
-    line += "\n";
-    entry += line;
+    if (endOfJournal(line)) {
+      done = true;
+    } else {
+      line += "\n";
+      entry += line;
+    }
   }
   writeToFile();
 }
@@ -91,12 +108,38 @@ string JournalEntry::getDate(void) {
 }
 
 void JournalEntry::writeToFile(void) {
-  ofstream outStream;
-  outStream.open("journal_entries.txt");
+  ofstream outStream("journal_entries.txt", ios_base::app);
+  outStream << "<id>" << id << "</id>" << endl;
   outStream << "<date>" << date << "</date>" << endl;
   outStream << "<entry>" << entry << "</entry>" << endl;
   outStream.close();
 }
-  
-  
-  
+
+bool JournalEntry::endOfJournal(string last_line) {
+  int length = static_cast<int>(last_line.length());
+  if (last_line[length-1] == 'D' && last_line[length-2] == '^') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void JournalEntry::getNumOfEntries(void) {
+  string line;
+  ifstream inStream("journal_entries.txt");
+  while (!inStream.eof()) {
+    getline(inStream, line);
+    if (line.substr(0,4) == "<id>") {
+      numOfEntries++;
+    }
+  }
+  inStream.close();
+}
+
+int JournalEntry::numOfEntries = 0;
+
+int JournalEntry::generateId(void) {
+  return numOfEntries++;
+}
+    
+    
