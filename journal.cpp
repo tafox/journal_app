@@ -15,6 +15,7 @@ class JournalEntry {
     bool endOfJournal(string last_line);
     static void getNumOfEntries(void);
     static int numOfEntries;
+    static void getEntryById(int);
   private:
     int generateId(void);
     void writeToFile(void);
@@ -27,8 +28,8 @@ int main(int args, char* argc[]) {
   bool done = false;
   string menu_selection;
   JournalEntry::getNumOfEntries();
+  cout << "Welcome to your Journal" << endl;
   while (!done) {
-    cout << "Welcome to your Journal" << endl;
     cout << "Type 'new' for new entry" << endl;
     cout << "Type 'view' to enter viewing mode" << endl;
     cout << "Type 'delete' to delete entire journal" << endl;
@@ -39,6 +40,10 @@ int main(int args, char* argc[]) {
     } else if (menu_selection == "view") {
       cout << "Now in viewing mode" << endl;
       cout << "There are " << JournalEntry::numOfEntries << " entries" << endl; 
+      cout << "Enter an entry id to view." << endl;
+      int entry_id;
+      cin >> entry_id;
+      JournalEntry::getEntryById(entry_id);
     } else if (menu_selection == "quit") {
       done = true;
     } else if (menu_selection == "delete") {
@@ -141,5 +146,43 @@ int JournalEntry::numOfEntries = 0;
 int JournalEntry::generateId(void) {
   return numOfEntries++;
 }
+
+void JournalEntry::getEntryById(int entry_id) {
+  string line;
+  string string_id;
+  int found_id;
+  bool foundEntry = false;
+  ifstream inStream("journal_entries.txt");
+  while (!foundEntry) {
+    getline(inStream, line);
+    if (inStream.eof()) {
+      cout << "Invalid entry id" << endl;
+      break;
+    }
+    if (line.substr(0,4) == "<id>") {
+      int i = 4;
+      while (line[i] != '<') {
+        i++;
+      }
+      string_id = line.substr(4,4-i);
+      found_id = stoi(string_id);
+      if (found_id == entry_id) {
+        foundEntry = true;
+        getline(inStream, line);
+        cout << line.substr(6,line.length()-7) << endl;
+        while (line.substr(0,4) != "<id>" && !inStream.eof()) {
+          getline(inStream, line);
+          cout << line << endl;
+
+        }
+      }
+    }
+  }
+  inStream.close();
+}
+      
+      
+      
+      
     
     
