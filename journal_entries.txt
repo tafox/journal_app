@@ -1,18 +1,14 @@
 <id>0</id>
-<date>Mon Jan 12 09:35:33 2015</date>
+<date>Thu Jan 15 18:30:26 2015</date>
 <entry>
-i am swag loard
+Test123
 </entry>
 <id>1</id>
-<date>Mon Jan 12 09:35:56 2015</date>
+<date>Thu Jan 15 18:30:42 2015</date>
 <entry>
 </entry>
 <id>2</id>
-<date>Mon Jan 12 14:37:09 2015</date>
+<date>Thu Jan 15 18:31:00 2015</date>
 <entry>
-</entry>
-<id>3</id>
-<date>Mon Jan 12 14:44:38 2015</date>
-<entry>
-iamcoool
+Test456
 </entry>

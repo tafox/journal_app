@@ -50,6 +50,7 @@ int main(int args, char* argc[]) {
       ofstream ofs;
       ofs.open("journal_entries.txt", ofstream::out | ofstream::trunc);
       ofs.close();
+	  JournalEntry::numOfEntries = 0;
     } else {
       cout << "Please input a valid option" << endl;
       done = true;
