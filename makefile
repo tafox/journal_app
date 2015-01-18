@@ -1,2 +1,2 @@
 all:
-	g++ journal.cpp -o journal
+	g++ *.cpp -o journal
