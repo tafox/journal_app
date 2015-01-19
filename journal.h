@@ -1,6 +1,8 @@
 #include <iostream>
+#include <vector>
 #include <ctime>
 #include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -25,6 +27,9 @@ class JournalResources {
 		static string getDate(void);
 		static void deleteJournal(void);
 		static void browseEntries(void);
+		static vector<int> searchByDate(void);
+
+		static string fileName;
 
 		static int numOfEntries;
 };

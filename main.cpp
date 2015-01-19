@@ -23,10 +23,21 @@ int main(int args, char* argc[])
 				cout << "Now in viewing mode" << endl;
 				cout << "There are " << JournalResources::numOfEntries << " entries" << endl; 
 				cout << "Enter browse to browse all entries" << endl;
+				cout << "Enter search to search by date" << endl;
 				cout << "Enter quit to quit viewing mode" << endl;
 				cin >> selection;
 				if (selection == "browse") {
 					JournalResources::browseEntries();
+				} else if (selection == "search") {
+					vector<int> ids = JournalResources::searchByDate();
+					vector<int>::iterator i;
+					for (i = ids.begin(); i != ids.end(); i++) {
+						if (i+1 == ids.end()) {
+							cout << *i << endl;
+						} else {
+							cout << *i << ", ";
+						}
+					}
 				} else if (selection == "quit") {
 					done_viewing = true;
 				} else {

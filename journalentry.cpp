@@ -22,7 +22,7 @@ JournalEntry::JournalEntry(void)
 
 void JournalEntry::writeToFile(void) 
 {
-	ofstream outStream("journal_entries.txt", ios_base::app);
+	ofstream outStream(JournalResources::fileName, ios_base::app);
 	outStream << "<id>" << id << "</id>" << endl;
 	outStream << "<date>" << date << "</date>" << endl;
 	outStream << "<entry>" << entry << "</entry>" << endl;
