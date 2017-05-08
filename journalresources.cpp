@@ -1,80 +1,93 @@
 #include "journal.h"
 
-string JournalResources::getDate(void)
-{
+string strip(string str) {
+    int j = 0;
+    for (int i = 0; i < str.length(); i++) {
+        if (str[i] == ' ') {
+            j++;    
+        } else {
+            j = 0;
+        }
+        if (j >= 2) {
+            str.erase(i, 1);
+            i++;
+        }
+    }
+    return str;
+}
+
+string JournalResources::getDate(void) {
 	string date, str_time;
 	time_t time_secs;
   	struct tm * time_now;
-  
 	time(&time_secs);
 	time_now = localtime(&time_secs);
 	date = string(asctime(time_now)); 
 	date = date.substr(0, date.size()-1); 
 	str_time = date.substr(11,5);
 	date.erase(11, 9);
+    date = strip(date);
 	date = str_time + " " + date;
 	return date;
 }
 
-void JournalResources::getNumOfEntries(void)
-{
-  string line;
-  ifstream inStream(fileName);
-  while (!inStream.eof()) {
-    getline(inStream, line);
-    if (line.substr(0,4) == "<id>") {
-      numOfEntries++;
-    }
-  }
-  inStream.close();
-}
-
-string JournalResources::getEntryById(int entry_id)
-{
-  string line, entry;
-  int found_id;
-  bool foundEntry = false;
-  ifstream inStream(fileName);
-  while (!foundEntry) {
-    getline(inStream, line);
-    if (inStream.eof()) {
-		return "";
-    }
-    if (line.substr(0,4) == "<id>") {
-      int i = 4;
-      while (line[i] != '<') {
-        i++;
-      }
-      found_id = stoi(line.substr(4,4-i));
-      if (found_id == entry_id) {
-        foundEntry = true;
-        getline(inStream, line);
-        entry = line.substr(6,line.length()-13) + "\n";
-        while (getline(inStream, line) && line.substr(0,4) != "<id>" && !inStream.eof()) {
-		  entry += (line + "\n");
+void JournalResources::calcNumOfEntries(void) {
+    string line;
+    numOfEntries = 0;
+    ifstream inStream(fileName);
+    while (getline(inStream, line)) {
+        if (line.substr(0,4) == "<id>") {
+          numOfEntries++;
         }
-      }
     }
-  }
-  inStream.close();
-  return entry;
+    inStream.close();
 }
 
-void JournalResources::deleteJournal(void)
-{
+string JournalResources::getEntryById(int entry_id) {
+    string line, entry;
+    int cur_id;
+    bool foundEntry = false;
+    ifstream inStream(fileName);
+    while (!foundEntry && getline(inStream, line)) {
+        cout << "loop" << endl;
+        int i = 4;
+        if (line.substr(0,4) == "<id>") {
+            while (line[i] != '<') {
+                i++;
+            }
+        } else {
+            continue;
+        }
+        cur_id = stoi(line.substr(4,i-4));
+        if (cur_id == entry_id) {
+            cout << "found" << endl;
+            foundEntry = true;
+            getline(inStream, line);
+            //get date
+            entry = line.substr(6,line.length()-13) + "\n";
+            while (getline(inStream, line) && line.substr(0,4) != "<id>") {
+                if (line.substr(0,2) != "<e" && line.substr(0,2) != "</") { 
+                    entry += (line + "\n");
+                }
+            }
+        }
+    }
+    inStream.close();
+    return entry;
+}
+
+void JournalResources::deleteJournal(void) {
 	ofstream ofs;
 	ofs.open(fileName, ofstream::out | ofstream::trunc);
 	ofs.close();
 	numOfEntries = 0;
 }
 
-int JournalResources::generateId(void)
-{
-  return ++numOfEntries;
+int JournalResources::generateId(void) {
+    return ++numOfEntries;
 }
 
-void JournalResources::browseEntries(void)
-{
+void JournalResources::browseEntries(void) {
 	string selection;
 	for (int i = 1; i <= numOfEntries;) {
 		cout << "At entry " << i << endl;
@@ -84,36 +97,43 @@ void JournalResources::browseEntries(void)
 		cout << "Press q to quit" << endl;
 		cout << "Enter an entry ID to go to that entry" << endl; 
 		cin >> selection;
+
 		if (selection == "p") {
 			if (i >= 2) {
 				i--;
 			} else {
-				cout << "At first entry" << endl;
+				cout << "At beginning of journal." << endl;
 			}
 		} else if (selection == "n") {
 			if (i == numOfEntries) {
-				cout << "At end of journal" << endl;
+				cout << "At end of journal." << endl;
 			} else {
 				i++;
 			}
 		} else if (selection == "q") {
 			break;
 	 	} else {
-			i = stoi(selection);
+            try {
+                cout << "115" << endl;
+                i = stoi(selection);
+                cout << "117" << endl;
+            } catch (std::exception ex) {
+                cout << "Invalid input" << endl;
+            }
 		}
 	}
 	cout << "Leaving browse mode" << endl;
 }
 
-vector<int> JournalResources::searchByDate(void) 
-{
-	string day, month, year;
+vector<int> JournalResources::searchByDate(void) {
+	string date, day, month, year;
 	vector<int> ids;
-	cout << "Enter a day, month, and year " << endl;
-	cin >> day;
-	cin >> month;
-	cin >> year;
-	cout << "Enteries for " << day << " " << month << " " << year << endl;
+	cout << "Enter a day, month, and year (DD/MM/YYYY):" << endl;
+    cin >> date;
+    day = date.substr(0,2);
+    month = date.substr(3,2);
+    year = date.substr(6,4);
+	cout << "Entries for " << day << " " << month << " " << year << endl;
 	ifstream inStream(fileName);
 	string prev_line, line;
 	while (getline(inStream, line) && !inStream.eof()) {
@@ -131,6 +151,18 @@ vector<int> JournalResources::searchByDate(void)
 	return ids;
 }
 
+void JournalResources::setFileName(string inFile) {
+    fileName = inFile;
+}
+
+string JournalResources::getFileName(void) {
+    return fileName;
+}
+
+int JournalResources::getNumOfEntries(void) {
+    return numOfEntries;
+}
+
 int JournalResources::numOfEntries = 0;
 
-string JournalResources::fileName = "journal_entries.txt";
+string JournalResources::fileName = "journal.xml";
